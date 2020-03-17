@@ -100,15 +100,38 @@ call :Clear_Error
 call :Test_Empty %ProgramFiles%
 if not errorlevel 1 set ProgramFiles=C:\Program Files
 
+REM Visual Studio is by default installed to %ProgramFiles% on 32-bit machines and
+REM %ProgramFiles(x86)% on 64-bit machines. Making a common variable for both.
+call :Clear_Error
+call :Test_Empty "%ProgramFiles(x86)%"
+if errorlevel 1 (
+    set "VS_ProgramFiles=%ProgramFiles(x86)%"
+) else (
+    set "VS_ProgramFiles=%ProgramFiles%"
+)
+
+REM Let vswhere tell us where msvc is at, if available.
+call :Clear_Error
+call vswhere_usability_wrapper.cmd
+call :Clear_Error
+if NOT "_%VS150COMNTOOLS%_" == "__" (
+    set "BOOST_JAM_TOOLSET=vc141"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS150COMNTOOLS%..\..\VC\"
+    goto :eof)
+call :Clear_Error
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"  (
+    set "BOOST_JAM_TOOLSET=vc141"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio\2017\Community\VC\"
+    goto :eof)
 call :Clear_Error
 if NOT "_%VS100COMNTOOLS%_" == "__" (
     set "BOOST_JAM_TOOLSET=vc10"
     set "BOOST_JAM_TOOLSET_ROOT=%VS100COMNTOOLS%..\..\VC\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual Studio 10.0\VC\VCVARSALL.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio 10.0\VC\VCVARSALL.BAT" (
     set "BOOST_JAM_TOOLSET=vc10"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio 10.0\VC\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio 10.0\VC\"
     goto :eof)
 call :Clear_Error
 if NOT "_%VS90COMNTOOLS%_" == "__" (
@@ -116,9 +139,9 @@ if NOT "_%VS90COMNTOOLS%_" == "__" (
     set "BOOST_JAM_TOOLSET_ROOT=%VS90COMNTOOLS%..\..\VC\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual Studio 9.0\VC\VCVARSALL.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio 9.0\VC\VCVARSALL.BAT" (
     set "BOOST_JAM_TOOLSET=vc9"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio 9.0\VC\"
     goto :eof)
 call :Clear_Error
 if NOT "_%VS80COMNTOOLS%_" == "__" (
@@ -126,9 +149,9 @@ if NOT "_%VS80COMNTOOLS%_" == "__" (
     set "BOOST_JAM_TOOLSET_ROOT=%VS80COMNTOOLS%..\..\VC\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual Studio 8\VC\VCVARSALL.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio 8\VC\VCVARSALL.BAT" (
     set "BOOST_JAM_TOOLSET=vc8"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio 8\VC\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio 8\VC\"
     goto :eof)
 call :Clear_Error
 if NOT "_%VS71COMNTOOLS%_" == "__" (
@@ -142,14 +165,14 @@ if NOT "_%VCINSTALLDIR%_" == "__" (
     set "BOOST_JAM_TOOLSET_ROOT=%VCINSTALLDIR%\VC7\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual Studio .NET 2003\VC7\bin\VCVARS32.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio .NET 2003\VC7\bin\VCVARS32.BAT" (
     set "BOOST_JAM_TOOLSET=vc7"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio .NET 2003\VC7\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio .NET 2003\VC7\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual Studio .NET\VC7\bin\VCVARS32.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio .NET\VC7\bin\VCVARS32.BAT" (
     set "BOOST_JAM_TOOLSET=vc7"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio .NET\VC7\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio .NET\VC7\"
     goto :eof)
 call :Clear_Error
 if NOT "_%MSVCDir%_" == "__" (
@@ -157,14 +180,14 @@ if NOT "_%MSVCDir%_" == "__" (
     set "BOOST_JAM_TOOLSET_ROOT=%MSVCDir%\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual Studio\VC98\bin\VCVARS32.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio\VC98\bin\VCVARS32.BAT" (
     set "BOOST_JAM_TOOLSET=msvc"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio\VC98\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio\VC98\"
     goto :eof)
 call :Clear_Error
-if EXIST "%ProgramFiles%\Microsoft Visual C++\VC98\bin\VCVARS32.BAT" (
+if EXIST "%VS_ProgramFiles%\Microsoft Visual C++\VC98\bin\VCVARS32.BAT" (
     set "BOOST_JAM_TOOLSET=msvc"
-    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual C++\VC98\"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual C++\VC98\"
     goto :eof)
 call :Clear_Error
 call :Test_Path cl.exe
@@ -258,6 +281,8 @@ if not errorlevel 1 (
     call :Guess_Toolset
     if not errorlevel 1 ( goto Setup_Toolset ) else ( goto Finish )
 )
+
+ECHO HELLO WORLD
 
 call :Clear_Error
 set BOOST_JAM_TOOLSET=%1
@@ -371,6 +396,40 @@ set "BOOST_JAM_OPT_MKJAMBASE=/Febootstrap\mkjambase0"
 set "BOOST_JAM_OPT_YYACC=/Febootstrap\yyacc0"
 set "_known_=1"
 :Skip_VC10
+if NOT "_%BOOST_JAM_TOOLSET%_" == "_vc141_" goto Skip_VC141
+call vswhere_usability_wrapper.cmd
+REM Reset ERRORLEVEL since from now on it's all based on ENV vars
+ver > nul 2> nul
+if "_%BOOST_JAM_TOOLSET_ROOT%_" == "__" (
+    if NOT "_%VS150COMNTOOLS%_" == "__" (
+        set "BOOST_JAM_TOOLSET_ROOT=%VS150COMNTOOLS%..\..\VC\"
+    ))
+
+if "_%B2_ARCH%_" == "__" set B2_ARCH=x86
+set BOOST_JAM_ARGS=%BOOST_JAM_ARGS% %B2_ARCH%
+
+REM return to current directory as vsdevcmd_end.bat switches to %USERPROFILE%\Source if it exists.
+pushd %CD%
+if "_%VSINSTALLDIR%_" == "__" call :Call_If_Exists "%BOOST_JAM_TOOLSET_ROOT%Auxiliary\Build\vcvarsall.bat" %BOOST_JAM_ARGS%
+popd
+
+if NOT "_%BOOST_JAM_TOOLSET_ROOT%_" == "__" (
+    if "_%VCINSTALLDIR%_" == "__" (
+        if "_%B2_ARCH%_" == "x86" (
+            set "PATH=%BOOST_JAM_TOOLSET_ROOT%Tools\MSVC\14.16.27023\bin\Hostx64\x86;%PATH%"
+        ) else (
+            set "PATH=%BOOST_JAM_TOOLSET_ROOT%Tools\MSVC\14.16.27023\bin\Hostx64\x64;%PATH%"
+        )
+    )
+)
+
+set "BOOST_JAM_CC=cl /nologo /RTC1 /Zi /MTd /Fobootstrap/ /Fdbootstrap/ -DNT -DYYDEBUG -wd4996 kernel32.lib advapi32.lib user32.lib"
+set "BOOST_JAM_OPT_JAM=/Febootstrap\jam0"
+set "BOOST_JAM_OPT_MKJAMBASE=/Febootstrap\mkjambase0"
+set "BOOST_JAM_OPT_YYACC=/Febootstrap\yyacc0"
+set "_known_=1"
+
+:Skip_VC141
 if NOT "_%BOOST_JAM_TOOLSET%_" == "_borland_" goto Skip_BORLAND
 if "_%BOOST_JAM_TOOLSET_ROOT%_" == "__" (
     call :Test_Path bcc32.exe )
