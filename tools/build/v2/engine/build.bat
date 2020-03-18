@@ -110,19 +110,19 @@ if errorlevel 1 (
     set "VS_ProgramFiles=%ProgramFiles%"
 )
 
-REM Let vswhere tell us where msvc is at, if available.
-call :Clear_Error
-call vswhere_usability_wrapper.cmd
-call :Clear_Error
-if NOT "_%VS150COMNTOOLS%_" == "__" (
-    set "BOOST_JAM_TOOLSET=vc141"
-    set "BOOST_JAM_TOOLSET_ROOT=%VS150COMNTOOLS%..\..\VC\"
-    goto :eof)
-call :Clear_Error
-if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"  (
-    set "BOOST_JAM_TOOLSET=vc141"
-    set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio\2017\Community\VC\"
-    goto :eof)
+REM REM Let vswhere tell us where msvc is at, if available.
+REM call :Clear_Error
+REM call vswhere_usability_wrapper.cmd
+REM call :Clear_Error
+REM if NOT "_%VS150COMNTOOLS%_" == "__" (
+REM     set "BOOST_JAM_TOOLSET=vc141"
+REM     set "BOOST_JAM_TOOLSET_ROOT=%VS150COMNTOOLS%..\..\VC\"
+REM     goto :eof)
+REM call :Clear_Error
+REM if EXIST "%VS_ProgramFiles%\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"  (
+REM     set "BOOST_JAM_TOOLSET=vc141"
+REM     set "BOOST_JAM_TOOLSET_ROOT=%VS_ProgramFiles%\Microsoft Visual Studio\2017\Community\VC\"
+REM     goto :eof)
 call :Clear_Error
 if NOT "_%VS100COMNTOOLS%_" == "__" (
     set "BOOST_JAM_TOOLSET=vc10"
